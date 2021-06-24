@@ -12,6 +12,7 @@ const _ = require('lodash');
 const stream = require('stream');
 const es = require('ent-streams');
 const P = sequelize.Sequelize.Promise;
+const sinon = require('sinon');
 
 describe('bulk upsert plugin', function () {
 
@@ -1014,5 +1015,55 @@ describe('bulk upsert plugin', function () {
                         _.first(bazz).name.should.equal('BazBaz');
                     }));
         });
+
+        it('should add a beforeBulkUpsert hook', async function () {
+            let error;
+            const Baz = sequelize.define('Baz', {
+                name: { type: DataTypes.STRING, primaryKey: true, field: 'my_custom_name' }
+            }, { tableName: 'bazz' });
+            const handler = sinon.spy();
+            Baz.hook('beforeBulkUpsert', handler);
+            await sequelize.sync({ force: true })
+            await sequelize.requiresTransaction(t => Baz.bulkUpsert([{ name: 'BazBaz' }], {
+                transaction: t,
+                idFields: ['name']
+            }));
+            handler.should.have.been.called;
+            handler.getCall(0).args[0].should.have.property('transaction');
+        });
+
+        it('should add a beforeBulkUpsertMerge hook', async function () {
+            let error;
+            const Baz = sequelize.define('Baz', {
+                name: { type: DataTypes.STRING, primaryKey: true, field: 'my_custom_name' }
+            }, { tableName: 'bazz' });
+            const handler = sinon.spy();
+            Baz.hook('beforeBulkUpsertMerge', handler);
+            await sequelize.sync({ force: true })
+            await sequelize.requiresTransaction(t => Baz.bulkUpsert([{ name: 'BazBaz' }], {
+                transaction: t,
+                idFields: ['name']
+            }));
+            handler.should.have.been.called;
+            handler.getCall(0).args[0].should.have.property('transaction');
+            handler.getCall(0).args[1].should.be.a('string');
+        });
+
+        it('should add an afterBulkUpsert hook', async function () {
+            let error;
+            const Baz = sequelize.define('Baz', {
+                name: { type: DataTypes.STRING, primaryKey: true, field: 'my_custom_name' }
+            }, { tableName: 'bazz' });
+            const handler = sinon.spy();
+            Baz.hook('afterBulkUpsert', handler);
+            await sequelize.sync({ force: true })
+            await sequelize.requiresTransaction(t => Baz.bulkUpsert([{ name: 'BazBaz' }], {
+                transaction: t,
+                idFields: ['name']
+            }));
+            handler.should.have.been.called;
+            handler.getCall(0).args[0].should.have.property('transaction');
+        });
+
     });
 });
