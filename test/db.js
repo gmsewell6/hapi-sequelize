@@ -41,6 +41,8 @@ const sequelize = new Sequelize(config.database, config.user, config.password, {
     dialect: 'postgres'
 });
 su.separateHasManyAssociationHook(sequelize);
+// required for bulk-upsert-plugin tests
+su.ensureDeepJsonbMerge(sequelize);
 
 exports.su = su;
 exports.sequelize = sequelize;
