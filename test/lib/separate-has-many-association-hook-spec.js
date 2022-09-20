@@ -5,7 +5,7 @@ const { should, sinon, models } = $;
 const { SourceModel, TargetModel } = models;
 
 describe(`separateHasManyAssociationHook`, () => {
-    let source, targets, querySpy;
+    let source, querySpy;
 
     beforeEach(async () => {
         source = await SourceModel.create({
@@ -13,7 +13,7 @@ describe(`separateHasManyAssociationHook`, () => {
             name: 'Source Number 0',
             config: { foo: 'bar' }
         });
-        targets = await TargetModel.bulkCreate([
+        await TargetModel.bulkCreate([
             { targetData: 'target data 0', name: 'Target Number 0', sourceId: source.id, data: { bar: 'baz' } },
             { targetData: 'target data 1', name: 'Target Number 1', sourceId: source.id, data: { foo: 1 } },
             { targetData: 'target data 2', name: 'Target Number 2', sourceId: source.id, data: { real: false } },
@@ -70,7 +70,11 @@ describe(`separateHasManyAssociationHook`, () => {
                     where: {
                         id: source.id
                     },
-                    include: { association: SourceModel.associations.targetModels, attributes: ['targetData'], separate: true },
+                    include: {
+                        association: SourceModel.associations.targetModels,
+                        attributes: ['targetData'],
+                        separate: true
+                    },
                     logging: querySpy
                 });
             } catch (err) {

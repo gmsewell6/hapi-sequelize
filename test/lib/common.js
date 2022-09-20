@@ -24,7 +24,9 @@ exports.expect = chai.expect;
 before(function () {
     const pool = new pg.Pool({
         user: config.user,
+        password: config.password,
         host: config.host,
+        port: config.port,
         database: 'postgres'
     });
     return new P(function (resolve) {

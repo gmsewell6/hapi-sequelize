@@ -1,11 +1,9 @@
 'use strict';
 
-var chai = require('chai');
-var should = chai.should();
-var lobPlugin = require('../../lib/lob-plugin');
-var stream = require('stream');
-var $ = require('./common');
-var P = $.sequelize.Promise;
+const chai = require('chai');
+const should = chai.should();
+const stream = require('stream');
+const $ = require('./common');
 
 describe('LobPlugin', function () {
     it('should create a lob', function () {
@@ -16,8 +14,8 @@ describe('LobPlugin', function () {
             });
     });
 
-    describe.skip('when a lob exists', function () {
-        var lobId;
+    describe('when a lob exists', function () {
+        let lobId;
 
         beforeEach(function () {
             return $.sequelize.lobCreate()
@@ -30,24 +28,24 @@ describe('LobPlugin', function () {
             return $.sequelize.lobUnlink(lobId);
         });
 
-        it.skip('should write a stream to it', function () {
-            var readStream = new stream.Readable();
-            readStream._read = function() {
+        it('should write a stream to it', function () {
+            const readStream = new stream.Readable();
+            readStream._read = function () {
                 this.push('this is a test');
-                this.push();
+                this.push(null);
             };
 
             return $.sequelize.lobWrite(lobId, readStream);
         });
 
-        it.skip('should read a stream from it', function () {
-            var readStream = new stream.Readable();
-            readStream._read = function() {
+        it('should read a stream from it', function () {
+            const readStream = new stream.Readable();
+            readStream._read = function () {
                 this.push('this is a test');
-                this.push();
+                this.push(null);
             };
 
-            var writeStream = new stream.Writable();
+            const writeStream = new stream.Writable();
             writeStream.bufs = [];
             writeStream._write = function (chunk, enc, done) {
                 this.bufs.push(chunk);
@@ -67,14 +65,14 @@ describe('LobPlugin', function () {
                 });
         });
 
-        it.skip('should truncate an existing lob', function () {
-            var readStream = new stream.Readable();
-            readStream._read = function() {
+        it('should truncate an existing lob', function () {
+            const readStream = new stream.Readable();
+            readStream._read = function () {
                 this.push('this is a test');
-                this.push();
+                this.push(null);
             };
 
-            var writeStream = new stream.Writable();
+            const writeStream = new stream.Writable();
             writeStream.bufs = [];
             writeStream._write = function (chunk, enc, done) {
                 this.bufs.push(chunk);
@@ -86,22 +84,22 @@ describe('LobPlugin', function () {
             };
 
             return $.sequelize.lobWrite(lobId, readStream)
-                .then(function(){
+                .then(function () {
                     return $.sequelize.lobTruncate(lobId);
                 })
-                .then(function(){
+                .then(function () {
                     return $.sequelize.lobRead(lobId, writeStream);
                 })
-                .then(function() {
+                .then(function () {
                     writeStream.bufs.should.have.length(0);
                 });
         });
 
-        it.skip('should get the size', function () {
-            var readStream = new stream.Readable();
-            readStream._read = function() {
+        it('should get the size', function () {
+            const readStream = new stream.Readable();
+            readStream._read = function () {
                 this.push('this is a test');
-                this.push();
+                this.push(null);
             };
 
             return $.sequelize.lobWrite(lobId, readStream)

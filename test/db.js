@@ -8,23 +8,25 @@ su.enableBulkUpsert();
 su.enableRequiresTransaction();
 
 /**
- * Postgres 9.4+ is required
+ * Postgres 11+ is required
  *
- * prior to running test:
- *      - need user 'test'
+ * prior to running test IF NOT USING 'postgres' user:
+ *      - need user <config.user>
  *      - need postgres db 'hapi_sequelize'
  *      - need connect permission configured for user/database on postgres db server
  *
- * 1) at a terminal (ubuntu):
- *      sudo -u postgres createuser -D -A -P test
- *              (no password when prompted)
- *      sudo -u postgres createdb -O test hapi_sequelize
+ *      1) at a terminal (ubuntu):
+ *              sudo -u postgres createuser -D -A -P <config.user>
+ *                      (add <config.password> when prompted)
+ *              sudo -u postgres createdb -O <config.user> hapi_sequelize
  *
- * 2) in your pg_hba.conf:
- *      - add entry under local:
- *          local    hapi_sequelize    test                                    trust
- *      - add entry under IPv4 local connections:
- *          host    hapi_sequelize    test            127.0.0.1/32            trust
+ *      2) in your pg_hba.conf:
+ *              - add entry under local:
+ *                  local    hapi_sequelize    <config.user>                                    trust
+ *              - add entry under IPv4 local connections:
+ *                  host    hapi_sequelize    <config.user>            127.0.0.1/32            trust
+ *
+ * Otherwise, alter config below for your Postgres server
  */
 const config = {
     host: 'localhost',
@@ -37,7 +39,7 @@ const config = {
 const sequelize = new Sequelize(config.database, config.user, config.password, {
     host: config.host,
     port: config.port,
-    //logging: false,
+    logging: false,
     dialect: 'postgres'
 });
 su.separateHasManyAssociationHook(sequelize);

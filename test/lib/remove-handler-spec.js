@@ -1,20 +1,16 @@
 'use strict';
 
-var chai = require('chai');
-var should = chai.should();
-var sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const sinon = require('sinon');
 chai.use(require('sinon-chai'));
-var _ = require('lodash');
-var factory = require('../../lib/remove-handler');
-var joi = require('joi');
-var Sequelize = require('@entrinsik/informer-sequelize');
-var P = Sequelize.Promise;
-var hapi = require('hapi');
-
-var $;
+const _ = require('lodash');
+const factory = require('../../lib/remove-handler');
+const Sequelize = require('@entrinsik/informer-sequelize');
+const hapi = require('hapi');
 
 describe('Generic Remove Handler', function () {
-    var server, destroyer, sequelize, transFunction, scope;
+    let server, destroyer, sequelize, scope;
 
     beforeEach(function () {
         //setup mocks
@@ -38,7 +34,6 @@ describe('Generic Remove Handler', function () {
                 }
             },
             requiresTransaction: function (transactedFunction) {
-                transFunction = transactedFunction;
                 return Sequelize.Promise.resolve(transactedFunction({ me: 'i am a transaction' }));
             }
         };
@@ -51,7 +46,7 @@ describe('Generic Remove Handler', function () {
         server.register(require('inject-then'), done);
     });
 
-    var addRoute = function (cfg) {
+    const addRoute = function (cfg) {
         server.route({ path: '/my/route', method: 'delete', config: _.assign(cfg, { id: 'foo.delete' }) });
     };
 
@@ -138,7 +133,9 @@ describe('Generic Remove Handler', function () {
                         preRemove: 'bar'
                     }
                 }
-            }).should.throw('Error in route /my/route: child "preRemove" fails because ["preRemove" must be a Function]');
+            })
+                .should
+                .throw('Error in route /my/route: child "preRemove" fails because ["preRemove" must be a Function]');
         });
 
         it('should support a postRemove extension point that is a function', function () {
@@ -161,7 +158,9 @@ describe('Generic Remove Handler', function () {
                         postRemove: 'bar'
                     }
                 }
-            }).should.throw('Error in route /my/route: child "postRemove" fails because ["postRemove" must be a Function]');
+            })
+                .should
+                .throw('Error in route /my/route: child "postRemove" fails because ["postRemove" must be a Function]');
         });
 
         it('should return a handler function when invoked', function () {

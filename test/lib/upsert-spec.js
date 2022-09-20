@@ -73,7 +73,8 @@ describe('native upsert plugin', function () {
                             old: {
                                 one: false
                             }
-                        }});
+                        }
+                    });
                 instance.get().should.deep.equal(
                     {
                         id: 1,

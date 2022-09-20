@@ -1,11 +1,11 @@
 'use strict';
 
-var slugs = require('../../lib/slug-plugin');
-var chai = require('chai');
-var should = chai.should();
-var db = require('../db');
-var sequelize = db.sequelize;
-var DataTypes = sequelize.Sequelize;
+const slugs = require('../../lib/slug-plugin');
+const chai = require('chai');
+const should = chai.should();
+const db = require('../db');
+const sequelize = db.sequelize;
+const DataTypes = sequelize.Sequelize;
 
 describe('slug-plugin', function () {
     it('should exist', function () {
@@ -17,7 +17,7 @@ describe('slug-plugin', function () {
     });
 
     describe('when an entity has basic slug support', function () {
-        var Datasource;
+        let Datasource;
 
         beforeEach(function () {
             Datasource = sequelize.define('Datasource', {
@@ -46,9 +46,9 @@ describe('slug-plugin', function () {
 
             it('should generate a unique moniker slug', function () {
                 return Datasource.generateSlug()
-                    .then(function(slug) {
+                    .then(function (slug) {
                         should.exist(slug);
-                    })
+                    });
             });
 
             it('should generate a slug from a name', function () {
@@ -74,7 +74,7 @@ describe('slug-plugin', function () {
     });
 
     describe('when an entity has a slug based on another field', function () {
-        var Datasource;
+        let Datasource;
 
         beforeEach(function () {
             Datasource = sequelize.define('Datasource', {
@@ -98,7 +98,7 @@ describe('slug-plugin', function () {
     });
 
     describe('when an entity has slug support on the id', function () {
-        var Datasource;
+        let Datasource;
 
         beforeEach(function () {
             Datasource = sequelize.define('Datasource', {

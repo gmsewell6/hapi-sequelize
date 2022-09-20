@@ -15,7 +15,7 @@ describe('QueryHandler', function () {
     let server, finder, sequelize, scope;
 
     beforeEach(function () {
-        finder = sinon.spy(function (opts, queryOpts) {
+        finder = sinon.spy(function () {
             const rows = [
                 { firstName: 'Brad', lastName: 'Leupen' },
                 { firstName: 'Hank', lastName: 'Leupen' }
@@ -78,7 +78,9 @@ describe('QueryHandler', function () {
         });
 
         it('should require a model', function () {
-            addRoute.bind(null, { handler: { 'db.query': {} } }).should.throw('Error in route /users: child "model" fails because ["model" is required]');
+            addRoute.bind(null, { handler: { 'db.query': {} } })
+                .should
+                .throw('Error in route /users: child "model" fails because ["model" is required]');
             addRoute.bind(null, {
                 handler: {
                     'db.query': {
@@ -147,7 +149,7 @@ describe('QueryHandler', function () {
                 handler: {
                     'db.query': {
                         model: 'User',
-                        where: function (req) {
+                        where: function () {
                         }
                     }
                 }
