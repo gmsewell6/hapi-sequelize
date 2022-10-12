@@ -10,7 +10,6 @@ const DataTypes = sequelize.Sequelize;
 const should = common.should;
 const _ = require('lodash');
 const stream = require('stream');
-const es = require('ent-streams');
 const P = sequelize.Sequelize.Promise;
 const sinon = require('sinon');
 
@@ -83,7 +82,7 @@ describe('bulk upsert plugin', function () {
                     }
                 }
             }));
-            const $stream = es.readArray(defns);
+            const $stream = stream.Readable.from(defns);
             return sequelize.requiresTransaction(t => Foo.bulkUpsertStream($stream, {
                 omit: ['_changes'],
                 transaction: t
@@ -105,7 +104,7 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should update from a stream', function () {
-            const $records = es.readArray([{
+            const $records = stream.Readable.from([{
                 id: 'foo',
                 immutableAttr: 'asdf',
                 name: 'My Foo',
@@ -152,7 +151,7 @@ describe('bulk upsert plugin', function () {
             })
                 .then(() => Foo.create({
                     id: 'bar',
-                    immutableAttr: 'Bar\s immutable value',
+                    immutableAttr: `Bar's immutable value`,
                     name: 'Bar',
                     deepMerge: {
                         current: {
@@ -224,7 +223,7 @@ describe('bulk upsert plugin', function () {
                 }];
             return Foo.create({
                 id: 'foo',
-                immutableAttr: 'Foo\'s immutable value',
+                immutableAttr: `Foo's immutable value`,
                 name: 'Foo',
                 deepMerge: {
                     old: {
@@ -239,7 +238,7 @@ describe('bulk upsert plugin', function () {
             })
                 .then(() => Foo.create({
                     id: 'bar',
-                    immutableAttr: 'Bar\s immutable value',
+                    immutableAttr: `Bar's immutable value`,
                     name: 'Bar',
                     deepMerge: {
                         current: {
@@ -279,7 +278,7 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should insert and update from a stream', function () {
-            const $records = es.readArray([
+            const $records = stream.Readable.from([
                 {
                     id: 'bar',
                     immutableAttr: 'aaa',
@@ -487,13 +486,12 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should trim virtual fields from records', function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true }
             }, {
                 tableName: 'bazz',
                 getterMethods: {
-                    id() {
+                    id () {
                         return this.name.toUpperCase();
                     }
                 }
@@ -518,7 +516,6 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should remap record values for field with different db column name', function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true },
                 data: { type: DataTypes.STRING, field: 'my_data_field' }
@@ -541,7 +538,6 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should remap record values for primary key field with different db column name', function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true, field: 'my_custom_name' }
             }, { tableName: 'bazz' });
@@ -555,14 +551,13 @@ describe('bulk upsert plugin', function () {
                         should.exist(bazz);
                         bazz.should.have.length(1);
                         _.first(bazz).name.should.equal('BazBaz');
-                    })
-                    .catch(err => error = err));
+                    }));
         });
 
         describe('errors', function () {
             it('should not do anything to the database if an error occurs', function () {
                 let upsertError;
-                const $records = es.readArray([{
+                const $records = stream.Readable.from([{
                     id: 'foo',
                     immutableAttr: 'asdf',
                     name: 'My Foo',
@@ -670,7 +665,8 @@ describe('bulk upsert plugin', function () {
                             current: {
                                 one: true
                             }
-                        }},
+                        }
+                    },
                     {
                         id: 'foo',
                         immutableAttr: 'aaaaaa',
@@ -777,8 +773,10 @@ describe('bulk upsert plugin', function () {
                 });
 
                 return P.resolve()
-                    .then(() => sequelize.requiresTransaction(t => bazRecordsNoOptional().then(recs => TestBaz.bulkUpsertStream(recs, { transaction: t }))))
-                    .then(() => sequelize.requiresTransaction(t => blahRecordsOptional().then(recs => TestBlah.bulkUpsertStream(recs, { transaction: t }))))
+                    .then(() => sequelize.requiresTransaction(t => bazRecordsNoOptional()
+                        .then(recs => TestBaz.bulkUpsertStream(recs, { transaction: t }))))
+                    .then(() => sequelize.requiresTransaction(t => blahRecordsOptional()
+                        .then(recs => TestBlah.bulkUpsertStream(recs, { transaction: t }))))
                     .should.eventually.be.rejectedWith(sequelize.ForeignKeyConstraintError);
             });
 
@@ -790,6 +788,7 @@ describe('bulk upsert plugin', function () {
                         this.name = 'InStreamError';
                     }
                 }
+
                 const $stream = new stream.Transform({ objectMode: true });
                 $stream._transform = function (rec, end, next) {
                     next(new InStreamError('Error while streaming'));
@@ -814,6 +813,7 @@ describe('bulk upsert plugin', function () {
                         this.name = 'InStreamError';
                     }
                 }
+
                 const $stream = new stream.Readable({ objectMode: true });
                 $stream._read = function () {
                     this.emit('error', new InStreamError('Error while streaming'));
@@ -835,6 +835,7 @@ describe('bulk upsert plugin', function () {
                         this.name = 'InStreamError';
                     }
                 }
+
                 const recs = [
                     { id: 'bar', immutableAttr: 'aaa', name: 'Bar' },
                     { id: 'foo', immutableAttr: 'zzz', name: 'Upserted Foo' }
@@ -945,13 +946,12 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should trim virtual fields from records', function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true }
             }, {
                 tableName: 'bazz',
                 getterMethods: {
-                    id() {
+                    id () {
                         return this.name.toUpperCase();
                     }
                 }
@@ -976,7 +976,6 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should remap record values for field with different db column name', function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true },
                 data: { type: DataTypes.STRING, field: 'my_data_field' }
@@ -999,7 +998,6 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should remap record values for primary key field with different db column name', function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true, field: 'my_custom_name' }
             }, { tableName: 'bazz' });
@@ -1017,13 +1015,12 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should add a beforeBulkUpsert hook', async function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true, field: 'my_custom_name' }
             }, { tableName: 'bazz' });
             const handler = sinon.spy();
             Baz.hook('beforeBulkUpsert', handler);
-            await sequelize.sync({ force: true })
+            await sequelize.sync({ force: true });
             await sequelize.requiresTransaction(t => Baz.bulkUpsert([{ name: 'BazBaz' }], {
                 transaction: t,
                 idFields: ['name']
@@ -1033,13 +1030,12 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should add a beforeBulkUpsertMerge hook', async function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true, field: 'my_custom_name' }
             }, { tableName: 'bazz' });
             const handler = sinon.spy();
             Baz.hook('beforeBulkUpsertMerge', handler);
-            await sequelize.sync({ force: true })
+            await sequelize.sync({ force: true });
             await sequelize.requiresTransaction(t => Baz.bulkUpsert([{ name: 'BazBaz' }], {
                 transaction: t,
                 idFields: ['name']
@@ -1050,13 +1046,12 @@ describe('bulk upsert plugin', function () {
         });
 
         it('should add an afterBulkUpsert hook', async function () {
-            let error;
             const Baz = sequelize.define('Baz', {
                 name: { type: DataTypes.STRING, primaryKey: true, field: 'my_custom_name' }
             }, { tableName: 'bazz' });
             const handler = sinon.spy();
             Baz.hook('afterBulkUpsert', handler);
-            await sequelize.sync({ force: true })
+            await sequelize.sync({ force: true });
             await sequelize.requiresTransaction(t => Baz.bulkUpsert([{ name: 'BazBaz' }], {
                 transaction: t,
                 idFields: ['name']

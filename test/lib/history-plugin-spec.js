@@ -1,17 +1,16 @@
 'use strict';
 
-var history = require('../../lib/history-plugin');
-var chai = require('chai');
-var should = chai.should();
-var _ = require('lodash');
-var db = require('../db');
-var sequelize = db.sequelize;
-var DataTypes = sequelize.Sequelize;
+const history = require('../../lib/history-plugin');
+const chai = require('chai');
+const should = chai.should();
+const db = require('../db');
+const sequelize = db.sequelize;
+const DataTypes = sequelize.Sequelize;
 
 chai.use(require('chai-as-promised'));
 
 describe('history-plugin', function () {
-    var Order, OrderHistory;
+    let Order, OrderHistory;
 
     beforeEach(function () {
         Order = sequelize
@@ -78,7 +77,7 @@ describe('history-plugin', function () {
     });
 
     describe('when the tracked model has been inserted', function () {
-        var order;
+        let order;
 
         beforeEach(function () {
             return Order.create({ product: 'SEMtek', customer: 'Bert Leupen', amount: 200.00 })
@@ -115,13 +114,13 @@ describe('history-plugin', function () {
                         history.should.respondTo('restore');
                         return history.restore();
                     })
-                    .then(function(order) {
+                    .then(function (order) {
                         order.amount.should.equal(200);
                         return OrderHistory.count();
                     })
-                    .then(function(count) {
+                    .then(function (count) {
                         count.should.equal(2);
-                    })
+                    });
             });
 
             describe('and the history table has been partially cleared', function () {

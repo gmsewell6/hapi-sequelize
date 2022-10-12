@@ -98,7 +98,9 @@ describe('Generic Lookup Handler', function () {
                         model: 'Account'
                     }
                 }
-            }).should.throw('Error in route /users/{username}: child "model" fails because ["model" must be one of [User, Bar]]');
+            })
+                .should
+                .throw('Error in route /users/{username}: child "model" fails because ["model" must be one of [User, Bar]]');
         });
 
         it('should support a where function', function () {
@@ -122,7 +124,9 @@ describe('Generic Lookup Handler', function () {
                         where: { foo: 'bar' }
                     }
                 }
-            }).should.throw('Error in route /users/{username}: child "where" fails because ["where" must be a Function]');
+            })
+                .should
+                .throw('Error in route /users/{username}: child "where" fails because ["where" must be a Function]');
         });
 
         it('should support a preLookup extension point that is a function', function () {
@@ -145,7 +149,9 @@ describe('Generic Lookup Handler', function () {
                         preLookup: 'bar'
                     }
                 }
-            }).should.throw('Error in route /users/{username}: child "preLookup" fails because ["preLookup" must be a Function]');
+            })
+                .should
+                .throw('Error in route /users/{username}: child "preLookup" fails because ["preLookup" must be a Function]');
         });
 
         it('should support a postLookup extension point that is a function', function () {
@@ -168,7 +174,9 @@ describe('Generic Lookup Handler', function () {
                         postLookup: 'bar'
                     }
                 }
-            }).should.throw('Error in route /users/{username}: child "postLookup" fails because ["postLookup" must be a Function]');
+            })
+                .should
+                .throw('Error in route /users/{username}: child "postLookup" fails because ["postLookup" must be a Function]');
         });
 
         it('should return a handler function when invoked', function () {

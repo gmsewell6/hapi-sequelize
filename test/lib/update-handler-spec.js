@@ -1,22 +1,21 @@
 'use strict';
 
-var chai = require('chai');
-var should = chai.should();
-var expect = chai.expect;
-var sinon = require('sinon');
+const chai = require('chai');
+const should = chai.should();
+const expect = chai.expect;
+const sinon = require('sinon');
 chai.use(require('sinon-chai'));
-var _ = require('lodash');
-var factory = require('../../lib/update-handler');
-var joi = require('joi');
-var Sequelize = require('@entrinsik/informer-sequelize');
-var hapi = require('hapi');
+const _ = require('lodash');
+const factory = require('../../lib/update-handler');
+const joi = require('joi');
+const Sequelize = require('@entrinsik/informer-sequelize');
+const hapi = require('hapi');
 
 describe('Generic Update Handler', function () {
-    var server, finder, thrower, sequelize, builder, saver, scope;
+    let server, finder, thrower, sequelize, builder, saver, scope;
 
     beforeEach(function () {
         //setup mocks
-
 
         thrower = sinon.spy(function () {
             return Sequelize.Promise.resolve(null);
@@ -27,7 +26,7 @@ describe('Generic Update Handler', function () {
         });
 
         finder = sinon.spy(function (opts) {
-            var instance = {
+            const instance = {
                 username: opts.where && opts.where.username,
                 change: 'robert',
                 set: sinon.spy(function (payload) {
@@ -41,7 +40,7 @@ describe('Generic Update Handler', function () {
         });
 
         builder = sinon.spy(function (opts) {
-            var instance = _.merge(opts, {
+            const instance = _.merge(opts, {
                 set: sinon.spy(function (payload) {
                     _.merge(this, payload);
                 }),
@@ -95,7 +94,7 @@ describe('Generic Update Handler', function () {
         server.register(require('inject-then'), done);
     });
 
-    var addRoute = function (cfg) {
+    const addRoute = function (cfg) {
         server.route({ path: '/users/{username}', method: 'put', config: _.assign(cfg, { id: 'user.update' }) });
     };
 
@@ -135,7 +134,9 @@ describe('Generic Update Handler', function () {
                         model: 'Account'
                     }
                 }
-            }).should.throw('Error in route /users/{username}: child "model" fails because ["model" must be one of [User, Bar]]');
+            })
+                .should
+                .throw('Error in route /users/{username}: child "model" fails because ["model" must be one of [User, Bar]]');
         });
 
         it('should support a where function', function () {
@@ -159,7 +160,9 @@ describe('Generic Update Handler', function () {
                         where: { foo: 'bar' }
                     }
                 }
-            }).should.throw('Error in route /users/{username}: child "where" fails because ["where" must be a Function]');
+            })
+                .should
+                .throw('Error in route /users/{username}: child "where" fails because ["where" must be a Function]');
         });
 
         it('should support a preLookup extension point that is a function', function () {
@@ -182,7 +185,9 @@ describe('Generic Update Handler', function () {
                         preUpdate: 'bar'
                     }
                 }
-            }).should.throw('Error in route /users/{username}: child "preUpdate" fails because ["preUpdate" must be a Function]');
+            })
+                .should
+                .throw('Error in route /users/{username}: child "preUpdate" fails because ["preUpdate" must be a Function]');
         });
 
         it('should support a postLookup extension point that is a function', function () {
@@ -216,7 +221,9 @@ describe('Generic Update Handler', function () {
                         postUpdate: 'bar'
                     }
                 }
-            }).should.throw('Error in route /users/{username}: child "postUpdate" fails because ["postUpdate" must be a Function]');
+            })
+                .should
+                .throw('Error in route /users/{username}: child "postUpdate" fails because ["postUpdate" must be a Function]');
         });
 
         it('should support a create flag', function () {
@@ -378,7 +385,7 @@ describe('Generic Update Handler', function () {
                 url: '/users/robert',
                 payload: { change: 'changeit' }
             }).then(function (res) {
-                var body = JSON.parse(res.payload);
+                const body = JSON.parse(res.payload);
                 body.should.have.property('username', 'robert');
                 body.should.have.property('change', 'changeit');
             });
@@ -448,7 +455,7 @@ describe('Generic Update Handler', function () {
         });
 
         it('should not call postLookup method if not found', function () {
-            var postUpdate = sinon.spy(function () {
+            const postUpdate = sinon.spy(function () {
                 return null;
             });
 
